@@ -1,0 +1,372 @@
+[
+  {
+    "statement": "MATCH (p:Person)-[:KNOWS]->(:Person) RETURN p, count(*) AS count",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)-[:KNOWS]->(:Person) RETURN p, count(*) AS count"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:KNOWS]-(:Person) RETURN p, count(*) AS count",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)<-[:KNOWS]-(:Person) RETURN p, count(*) AS count"
+  },
+  {
+    "statement": "MATCH (p:Person {id:\"Foo\"})<-[:WORKS_AT]-(o:Organization) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person {id:\"Foo\"})-[:WORKS_AT]->(o:Organization) RETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (o:Organization)-[:WORKS_AT]->(p:Person {id:\"Foo\"}) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (o:Organization)<-[:WORKS_AT]-(p:Person {id:\"Foo\"}) RETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (o:Organization {name:\"Bar\"})-[:WORKS_AT]->(p:Person {id:\"Foo\"}) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (o:Organization {name:\"Bar\"})<-[:WORKS_AT]-(p:Person {id:\"Foo\"}) RETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (o:Organization)-[:WORKS_AT]->(p:Person {id:\"Foo\"})-[:WORKS_AT]->(o1:Organization) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (o:Organization)<-[:WORKS_AT]-(p:Person {id:\"Foo\"})-[:WORKS_AT]->(o1:Organization) RETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (o:`Organization` {name:\"Foo\"})-[:WORKS_AT]->(p:Person {id:\"Foo\"})-[:WORKS_AT]-(o1:Organization {name:\"b\"})\nWHERE id(o) > id(o1)\nRETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (o:`Organization` {name:\"Foo\"})<-[:WORKS_AT]-(p:Person {id:\"Foo\"})-[:WORKS_AT]-(o1:Organization {name:\"b\"})\nWHERE id(o) > id(o1)\nRETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (p:Person)\nRETURN p,\n       [(p)-[:WORKS_AT]->(o:Organization) | o.name] AS op",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)\nRETURN p,\n       [(p)-[:WORKS_AT]->(o:Organization) | o.name] AS op"
+  },
+  {
+    "statement": "MATCH (p:Person)\nRETURN p,\n       [(p)<-[:WORKS_AT]-(o:Organization) | o.name] AS op",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)\nRETURN p,\n       [(p)-[:WORKS_AT]->(o:Organization) | o.name] AS op"
+  },
+  {
+    "statement": "MATCH (p:Person {name:\"John\"}) MATCH (p)-[:WORKS_AT]->(:Organization) RETURN p, count(*)",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person {name:\"John\"}) MATCH (p)-[:WORKS_AT]->(:Organization) RETURN p, count(*)"
+  },
+  {
+    "statement": "MATCH (p:Person) MATCH (p)<-[:WORKS_AT]-(:Organization) RETURN p, count(*)",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person) MATCH (p)-[:WORKS_AT]->(:Organization) RETURN p, count(*)"
+  },
+  {
+    "statement": "MATCH (p:Person), (p)<-[:WORKS_AT]-(:Organization) RETURN p, count(*)",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person), (p)-[:WORKS_AT]->(:Organization) RETURN p, count(*)"
+  },
+  {
+    "statement": "MATCH (o:Organization)-[:WORKS_AT]->(p:Person {id:\"Foo\"})-[:WORKS_AT]->(o1:Organization) \nWHERE id(o) < id(o1) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (o:Organization)<-[:WORKS_AT]-(p:Person {id:\"Foo\"})-[:WORKS_AT]->(o1:Organization) \nWHERE id(o) < id(o1) RETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (o:Organization)-[:WORKS_AT]-(p:Person {id:\"Foo\"})-[:WORKS_AT]-(o1:Organization) \nWHERE id(o) < id(o1) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (o:Organization)-[:WORKS_AT]-(p:Person {id:\"Foo\"})-[:WORKS_AT]-(o1:Organization) \nWHERE id(o) < id(o1) RETURN o.name AS name"
+  },
+  {
+    "statement": "MATCH (p:Person)--(:Organization)--(p1:Person)\nRETURN p1",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)--(:Organization)--(p1:Person)\nRETURN p1"
+  },
+  {
+    "statement": "MATCH (p:Person)<--(:Organization)--(p1:Person)\nRETURN p1",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)-->(:Organization)--(p1:Person)\nRETURN p1"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[r]-(:Organization)--(p1:Person)\nRETURN p1, r",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)-[r]->(:Organization)--(p1:Person)\nRETURN p1, r"
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)<--(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-[:KNOWS]->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": ""
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)<-[:WORKS_AT|INVESTOR]-(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization), (Person, INVESTOR, Organization)",
+    "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-[:WORKS_AT|INVESTOR]->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
+  },
+  {
+    "statement": "MATCH (p:Person)\nWHERE EXISTS { (p)<-[:KNOWS]-()}\nRETURN p",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)\nWHERE EXISTS { (p)<-[:KNOWS]-()}\nRETURN p"
+  },
+  {
+    "statement": "MATCH (p:Person)\nWHERE EXISTS { (p)-[:KNOWS]->()}\nRETURN p",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)\nWHERE EXISTS { (p)-[:KNOWS]->()}\nRETURN p"
+  },
+  {
+    "statement": "MATCH (p:Person)\nWHERE EXISTS { (p)<-[:WORKS_AT]-()}\nRETURN p",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)\nWHERE EXISTS { (p)-[:WORKS_AT]->()}\nRETURN p"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name = 'Tom Hanks'\nAND m.year = 2013\nRETURN m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name = 'Tom Hanks'\nAND m.year = 2013\nRETURN m.title"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]-(m:Movie)\nWHERE p.name = 'Tom Hanks'\nAND m.year = 2013\nRETURN m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]-(m:Movie)\nWHERE p.name = 'Tom Hanks'\nAND m.year = 2013\nRETURN m.title"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:ACTED_IN]-(m:Movie)\nWHERE p.name = 'Tom Hanks'\nAND m.year = 2013\nRETURN m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name = 'Tom Hanks'\nAND m.year = 2013\nRETURN m.title"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nRETURN p.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nRETURN p.name"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nAND m.year > 2019\nAND m.year < 2030\nRETURN p.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nAND m.year > 2019\nAND m.year < 2030\nRETURN p.name"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:ACTED_IN]-(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nAND m.year > 2019\nAND m.year < 2030\nRETURN p.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nAND m.year > 2019\nAND m.year < 2030\nRETURN p.name"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:FOLLOWS]-(m:Movie)\nWHERE p.name <> 'Tom Hanks'\nAND m.title = 'Captain Phillips'\nAND m.year > 2019\nAND m.year < 2030\nRETURN p.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": ""
+  },
+  {
+    "statement": "MATCH (p:Person)-[:`ACTED_IN`]->(m:Movie)<-[:DIRECTED]-(p)\nWHERE  p.born.year > 1960\nRETURN p.name, p.born, labels(p), m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:`ACTED_IN`]->(m:Movie)<-[:DIRECTED]-(p)\nWHERE  p.born.year > 1960\nRETURN p.name, p.born, labels(p), m.title"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]-(m:Movie)<-[:DIRECTED]-(p)\nWHERE  p.born.year > 1960\nRETURN p.name, p.born, labels(p), m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]-(m:Movie)<-[:DIRECTED]-(p)\nWHERE  p.born.year > 1960\nRETURN p.name, p.born, labels(p), m.title"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]-(m:Movie)-[:DIRECTED]->(p)\nWHERE  p.born.year > 1960\nRETURN p.name, p.born, labels(p), m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]-(m:Movie)<-[:DIRECTED]-(p)\nWHERE  p.born.year > 1960\nRETURN p.name, p.born, labels(p), m.title"
+  },
+  {
+    "statement": "MATCH (p:`Person`)<-[r]-(m:Movie)\nWHERE  p.name = 'Tom Hanks'\nRETURN m.title AS movie, type(r) AS relationshipType",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:`Person`)-[r]->(m:Movie)\nWHERE  p.name = 'Tom Hanks'\nRETURN m.title AS movie, type(r) AS relationshipType"
+  },
+  {
+    "statement": "MATCH (d:Person)-[:DIRECTED]->(m:Movie)-[:IN_GENRE]->(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (d:Person)-[:DIRECTED]->(m:Movie)-[:IN_GENRE]->(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name"
+  },
+  {
+    "statement": "MATCH (d:Person)-[:DIRECTED]->(m:Movie)<--(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (d:Person)-[:DIRECTED]->(m:Movie)-->(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name"
+  },
+  {
+    "statement": "MATCH (d:Person)<--(m:Movie)<--(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (d:Person)-->(m:Movie)-->(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name"
+  },
+  {
+    "statement": "MATCH (d:Person)-[:DIRECTED]-(m:Movie)<-[:IN_GENRE]-(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (d:Person)-[:DIRECTED]-(m:Movie)-[:IN_GENRE]->(g:Genre)\nWHERE m.year = 2000 AND g.name = \"Horror\"\nRETURN d.name"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE  p.name = 'Tom Hanks'\nAND exists {(p)-[:DIRECTED]->(m)}\nRETURN p.name, labels(p), m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE  p.name = 'Tom Hanks'\nAND exists {(p)-[:DIRECTED]->(m)}\nRETURN p.name, labels(p), m.title"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE  p.name = 'Tom Hanks'\nAND exists {(p)<-[:DIRECTED]-(m)}\nRETURN p.name, labels(p), m.title",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie)\nWHERE  p.name = 'Tom Hanks'\nAND exists {(p)-[:DIRECTED]->(m)}\nRETURN p.name, labels(p), m.title"
+  },
+  {
+    "statement": "MATCH (a:Person)-[:ACTED_IN]->(m:Movie)\nWHERE m.year > 2000\nMATCH (m)<-[:DIRECTED]-(d:Person)\nRETURN a.name, m.title, d.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (a:Person)-[:ACTED_IN]->(m:Movie)\nWHERE m.year > 2000\nMATCH (m)<-[:DIRECTED]-(d:Person)\nRETURN a.name, m.title, d.name"
+  },
+  {
+    "statement": "MATCH (a:Person)-[:ACTED_IN]-(m:Movie)\nWHERE m.year > 2000\nMATCH (m)-[:DIRECTED]->(d:Person)\nRETURN a.name, m.title, d.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (a:Person)-[:ACTED_IN]-(m:Movie)\nWHERE m.year > 2000\nMATCH (m)<-[:DIRECTED]-(d:Person)\nRETURN a.name, m.title, d.name"
+  },
+  {
+    "statement": "MATCH (m:Movie) WHERE m.title = \"Kiss Me Deadly\"\nMATCH (m)-[:IN_GENRE]-(g:Genre)-[:IN_GENRE]->(rec:Movie)\nMATCH (m)-[:ACTED_IN]->(a:Person)-[:ACTED_IN]-(rec)\nRETURN rec.title, a.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (m:Movie) WHERE m.title = \"Kiss Me Deadly\"\nMATCH (m)-[:IN_GENRE]-(g:Genre)<-[:IN_GENRE]-(rec:Movie)\nMATCH (m)<-[:ACTED_IN]-(a:Person)-[:ACTED_IN]-(rec)\nRETURN rec.title, a.name"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie),\n(coActors:Person)-[:ACTED_IN]->(m)\nWHERE p.name = 'Eminem'\nRETURN m.title AS movie ,collect(coActors.name) AS coActors",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie),\n(coActors:Person)-[:ACTED_IN]->(m)\nWHERE p.name = 'Eminem'\nRETURN m.title AS movie ,collect(coActors.name) AS coActors"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:ACTED_IN]-(m:Movie),\n(coActors:Person)-[:ACTED_IN]->(m)\nWHERE p.name = 'Eminem'\nRETURN m.title AS movie ,collect(coActors.name) AS coActors",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN]->(m:Movie),\n(coActors:Person)-[:ACTED_IN]->(m)\nWHERE p.name = 'Eminem'\nRETURN m.title AS movie ,collect(coActors.name) AS coActors"
+  },
+  {
+    "statement": "MATCH p = ((person:Person)<-[]-(movie:Movie))\nWHERE person.name = 'Walt Disney'\nRETURN p",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH p = ((person:Person)-[]->(movie:Movie))\nWHERE person.name = 'Walt Disney'\nRETURN p"
+  },
+  {
+    "statement": "MATCH p = ((person:Person)<-[:DIRECTED]-(movie:Movie))\nWHERE person.name = 'Walt Disney'\nRETURN p",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH p = ((person:Person)-[:DIRECTED]->(movie:Movie))\nWHERE person.name = 'Walt Disney'\nRETURN p"
+  },
+  {
+    "statement": "MATCH p = shortestPath((p1:Person)-[*]-(p2:Person))\nWHERE p1.name = \"Eminem\"\nAND p2.name = \"Charlton Heston\"\nRETURN  p",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH p = shortestPath((p1:Person)-[*]-(p2:Person))\nWHERE p1.name = \"Eminem\"\nAND p2.name = \"Charlton Heston\"\nRETURN  p"
+  },
+  {
+    "statement": "MATCH p = ((person:Person)-[:DIRECTED*]->(:Person))\nWHERE person.name = 'Walt Disney'\nRETURN p",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH p = ((person:Person)-[:DIRECTED*]->(:Person))\nWHERE person.name = 'Walt Disney'\nRETURN p"
+  },
+  {
+    "statement": "MATCH p = ((person:Person)-[:DIRECTED*1..4]->(:Person))\nWHERE person.name = 'Walt Disney'\nRETURN p",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH p = ((person:Person)-[:DIRECTED*1..4]->(:Person))\nWHERE person.name = 'Walt Disney'\nRETURN p"
+  },
+  {
+    "statement": "MATCH (p:Person {name: 'Eminem'})-[:ACTED_IN*2]-(others:Person)\nRETURN  others.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person {name: 'Eminem'})-[:ACTED_IN*2]-(others:Person)\nRETURN  others.name"
+  },
+  {
+    "statement": "MATCH (u:User {name: \"Misty Williams\"})-[r:RATED]->(:Movie)\nWITH u, avg(r.rating) AS average\nMATCH (u)-[r:RATED]->(m:Movie)\nWHERE r.rating > average\nRETURN average , m.title AS movie,\nr.rating as rating\nORDER BY rating DESC",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (User, RATED, Movie)",
+    "correct_query": "MATCH (u:User {name: \"Misty Williams\"})-[r:RATED]->(:Movie)\nWITH u, avg(r.rating) AS average\nMATCH (u)-[r:RATED]->(m:Movie)\nWHERE r.rating > average\nRETURN average , m.title AS movie,\nr.rating as rating\nORDER BY rating DESC"
+  },
+  {
+    "statement": "MATCH (u:User {name: \"Misty Williams\"})-[r:RATED]->(:Movie)\nWITH u, avg(r.rating) AS average\nMATCH (u)<-[r:RATED]-(m:Movie)\nWHERE r.rating > average\nRETURN average , m.title AS movie,\nr.rating as rating\nORDER BY rating DESC",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (User, RATED, Movie)",
+    "correct_query": "MATCH (u:User {name: \"Misty Williams\"})-[r:RATED]->(:Movie)\nWITH u, avg(r.rating) AS average\nMATCH (u)-[r:RATED]->(m:Movie)\nWHERE r.rating > average\nRETURN average , m.title AS movie,\nr.rating as rating\nORDER BY rating DESC"
+  },
+  {
+    "statement": "MATCH (p:`Person`)\nWHERE p.born.year = 1980\nWITH p  LIMIT 3\nMATCH (p)<-[:ACTED_IN]-(m:Movie)\nWITH p, collect(m.title) AS movies\nRETURN p.name AS actor,  movies",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:`Person`)\nWHERE p.born.year = 1980\nWITH p  LIMIT 3\nMATCH (p)-[:ACTED_IN]->(m:Movie)\nWITH p, collect(m.title) AS movies\nRETURN p.name AS actor,  movies"
+  },
+  {
+    "statement": "MATCH (p:Person)\nWHERE p.born.year = 1980\nWITH p  LIMIT 3\nMATCH (p)-[:ACTED_IN]->(m:Movie)<-[:IN_GENRE]-(g)\nWITH p, collect(DISTINCT g.name) AS genres\nRETURN p.name AS actor, genres",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)\nWHERE p.born.year = 1980\nWITH p  LIMIT 3\nMATCH (p)-[:ACTED_IN]->(m:Movie)-[:IN_GENRE]->(g)\nWITH p, collect(DISTINCT g.name) AS genres\nRETURN p.name AS actor, genres"
+  },
+  {
+    "statement": "CALL {\n   MATCH (m:Movie) WHERE m.year = 2000\n   RETURN m ORDER BY m.imdbRating DESC LIMIT 10\n}\nMATCH  (:User)-[r:RATED]->(m)\nRETURN m.title, avg(r.rating)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (User, RATED, Movie)",
+    "correct_query": "CALL {\n   MATCH (m:Movie) WHERE m.year = 2000\n   RETURN m ORDER BY m.imdbRating DESC LIMIT 10\n}\nMATCH  (:User)-[r:RATED]->(m)\nRETURN m.title, avg(r.rating)"
+  },
+  {
+    "statement": "CALL {\n   MATCH (m:Movie) WHERE m.year = 2000\n   RETURN m ORDER BY m.imdbRating DESC LIMIT 10\n}\nMATCH  (:User)<-[r:RATED]-(m)\nRETURN m.title, avg(r.rating)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (User, RATED, Movie)",
+    "correct_query": "CALL {\n   MATCH (m:Movie) WHERE m.year = 2000\n   RETURN m ORDER BY m.imdbRating DESC LIMIT 10\n}\nMATCH  (:User)-[r:RATED]->(m)\nRETURN m.title, avg(r.rating)"
+  },
+  {
+    "statement": "MATCH (m:Movie)\nCALL {\n    WITH m\n    MATCH (m)-[r:RATED]->(u)\n     WHERE r.rating = 5\n    RETURN count(u) AS numReviews\n}\nRETURN m.title, numReviews\nORDER BY numReviews DESC",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (m:Movie)\nCALL {\n    WITH m\n    MATCH (m)<-[r:RATED]-(u)\n     WHERE r.rating = 5\n    RETURN count(u) AS numReviews\n}\nRETURN m.title, numReviews\nORDER BY numReviews DESC"
+  },
+  {
+    "statement": "MATCH (p:Person)\nWITH p LIMIT 100\nCALL {\n  WITH p\n  OPTIONAL MATCH (p)<-[:ACTED_IN]-(m)\n  RETURN m.title + \": \" + \"Actor\" AS work\nUNION\n  WITH p\n  OPTIONAL MATCH (p)-[:DIRECTED]->(m:Movie)\n  RETURN m.title+ \": \" +  \"Director\" AS work\n}\nRETURN p.name, collect(work)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)\nWITH p LIMIT 100\nCALL {\n  WITH p\n  OPTIONAL MATCH (p)-[:ACTED_IN]->(m)\n  RETURN m.title + \": \" + \"Actor\" AS work\nUNION\n  WITH p\n  OPTIONAL MATCH (p)-[:DIRECTED]->(m:Movie)\n  RETURN m.title+ \": \" +  \"Director\" AS work\n}\nRETURN p.name, collect(work)"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:ACTED_IN {role:\"Neo\"}]-(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN {role:\"Neo\"}]->(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:ACTED_IN {role:\"Neo\"}]-(m)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN {role:\"Neo\"}]->(m)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p"
+  },
+  {
+    "statement": "MATCH (p:Person)-[:ACTED_IN {role:\"Neo\"}]->(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:ACTED_IN {role:\"Neo\"}]->(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m"
+  },
+  {
+    "statement": "MATCH (wallstreet:Movie {title: 'Wall Street'})-[:ACTED_IN {role:\"Foo\"}]->(actor)\nRETURN actor.name",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (wallstreet:Movie {title: 'Wall Street'})<-[:ACTED_IN {role:\"Foo\"}]-(actor)\nRETURN actor.name"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:`ACTED_IN` {role:\"Neo\"}]-(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:`ACTED_IN` {role:\"Neo\"}]->(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m"
+  },
+  {
+    "statement": "MATCH (p:`Person`)<-[:`ACTED_IN` {role:\"Neo\"}]-(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:`Person`)-[:`ACTED_IN` {role:\"Neo\"}]->(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m"
+  },
+  {
+    "statement": "MATCH (p:`Person`)<-[:`ACTED_IN` {role:\"Neo\"}]-(m)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:`Person`)-[:`ACTED_IN` {role:\"Neo\"}]->(m)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:!DIRECTED]-(:Movie) RETURN p, count(*)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:!DIRECTED]->(:Movie) RETURN p, count(*)"
+  },
+  {
+    "statement": "MATCH (p:Person)<-[:`ACTED_IN`|`DIRECTED`]-(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie)",
+    "correct_query": "MATCH (p:Person)-[:`ACTED_IN`|`DIRECTED`]->(m:Movie)\nWHERE p.name = $actorName\nAND m.title = $movieName\nRETURN p, m"
+  },
+  {
+    "statement": "MATCH (a:Person:Actor)-[:ACTED_IN]->(:Movie)\nRETURN a, count(*)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (Actor, ACTED_IN, Movie)",
+    "correct_query": "MATCH (a:Person:Actor)-[:ACTED_IN]->(:Movie)\nRETURN a, count(*)"
+  },
+  {
+    "statement": "MATCH (a:Person:Actor)<-[:ACTED_IN]-(:Movie)\nRETURN a, count(*)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (Actor, ACTED_IN, Movie)",
+    "correct_query": "MATCH (a:Person:Actor)-[:ACTED_IN]->(:Movie)\nRETURN a, count(*)"
+  },
+  {
+    "statement": "MATCH (a:Person:Actor)<-[:ACTED_IN]-()\nRETURN a, count(*)",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (Actor, ACTED_IN, Movie)",
+    "correct_query": "MATCH (a:Person:Actor)-[:ACTED_IN]->()\nRETURN a, count(*)"
+  },
+  {
+    "statement": "MATCH (a:Person:Actor)\nRETURN a, [(a)<-[:`ACTED_IN`]-(m) | m.title] AS movies",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (Actor, ACTED_IN, Movie)",
+    "correct_query": "MATCH (a:Person:Actor)\nRETURN a, [(a)-[:`ACTED_IN`]->(m) | m.title] AS movies"
+  },
+  {
+    "statement": "MATCH (a:Person:Actor)\nRETURN a, [(a)-[:`ACTED_IN`]->(m) | m.title] AS movies",
+    "schema": "(Person, FOLLOWS, Person), (Person, ACTED_IN, Movie), (Person, REVIEWED, Movie), (Person, WROTE, Movie), (Person, DIRECTED, Movie), (Movie, IN_GENRE, Genre), (Person, RATED, Movie), (Actor, ACTED_IN, Movie)",
+    "correct_query": "MATCH (a:Person:Actor)\nRETURN a, [(a)-[:`ACTED_IN`]->(m) | m.title] AS movies"
+  }
+]

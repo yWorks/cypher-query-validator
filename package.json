@@ -1,0 +1,25 @@
+{
+  "name": "cypher-validator",
+  "version": "0.0.1",
+  "description": "Validates and fixes Cypher with for a given schema",
+  "main": "index.ts",
+  "scripts": {
+    "run": "ts-node src/validate.ts",
+    "test": "cross-env TS_NODE_PROJECT='./tsconfig.test.json' mocha -r ts-node/register 'tests/**/*.ts'",
+    "generate-antlr-ts": "docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v `pwd`:/work antlr/antlr4 -Dlanguage=TypeScript Cypher.g4"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "antlr4": "^4.13.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "ts-node": "^10.9.1",
+    "@types/mocha": "^10.0.1",
+    "@types/chai": "^4.3.5",
+    "chai": "^4.3.8",
+    "mocha": "^10.2.0",
+    "cross-env": "^7.0.3"
+  }
+}

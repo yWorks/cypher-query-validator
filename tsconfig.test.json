@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "module": "commonjs",
+        "sourceMap": true,
+        "declaration": true,
+        "outDir": "./dist",
+        "strict": true,
+        "types": ["mocha", "node"],
+        "resolveJsonModule": true,
+        "esModuleInterop": true
+    }
+}
