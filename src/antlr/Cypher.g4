@@ -147,6 +147,7 @@ clause : loadCSVClause
        | withClause
        | returnClause
        | call
+       | subqueryClause
        ;
 
 command : createIndex
@@ -412,6 +413,10 @@ returnItem : ( expression SP AS SP variable )
 
 call :  CALL SP procedureInvocation SP? procedureResults? ;
 
+subqueryClause :  CALL SP? subquery ;
+
+subquery : '{' SP? query? SP? '}' ;
+
 procedureInvocation : procedureInvocationBody SP? procedureArguments? ;
 
 procedureInvocationBody : namespace procedureName ;
@@ -515,7 +520,13 @@ labelName : symbolicName ;
 
 relTypeName : symbolicName ;
 
-expression : orExpression ;
+expression : orExpression | existsSubQuery;
+
+existsSubQuery : EXISTS SP? existsSubQueryBody;
+
+existsSubQueryBody: subquery | subqueryPatternBody ;
+
+subqueryPatternBody: '{' SP? pattern ( hint )* ( SP? where )? SP? '}' ;
 
 orExpression : xorExpression ( SP OR SP xorExpression )* ;
 
