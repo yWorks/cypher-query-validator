@@ -65,8 +65,15 @@ class PatternFixer extends CypherListener {
 
   startNewScope(inherit: boolean = true) {
     this.scopes.push({
-      bindings: inherit ? [...this.scopes.at(-1).bindings] : [],
+      bindings: inherit ? [...this.currentScope().bindings] : [],
     });
+  }
+
+  private currentScope(): Scope {
+    if (this.scopes.length === 0) {
+      throw new Error("Not initialized");
+    }
+    return this.scopes.at(-1)!;
   }
 
   exitScope() {
@@ -74,12 +81,12 @@ class PatternFixer extends CypherListener {
   }
 
   registerVariable(name: string, types: LabelValidator) {
-    const scope = this.scopes.at(-1)!;
+    const scope = this.currentScope();
     scope.bindings.push({ name, types });
   }
 
   resolve(variable: string): LabelValidator {
-    const scope = this.scopes.at(-1);
+    const scope = this.currentScope();
     let binding = scope.bindings.find((b) => b.name === variable);
     if (binding && binding.types) {
       return binding.types;
@@ -97,6 +104,7 @@ class PatternFixer extends CypherListener {
 
   enterSubqueryClause: (ctx: SubqueryClauseContext) => void = () =>
     this.startNewScope();
+
   exitSubqueryClause: (ctx: SubqueryClauseContext) => void = () =>
     this.exitScope();
 
@@ -178,11 +186,13 @@ class PatternFixer extends CypherListener {
   enterWithClause: (ctx: WithClauseContext) => void = (ctx) => {
     const bindings = BindingCollector.getBindings(
       (variable) => this.resolve(variable),
-      this.scopes.at(-1).bindings,
+      this.currentScope().bindings,
       ctx,
     );
     this.startNewScope(false);
-    bindings.forEach((b) => this.registerVariable(b.name, b.types));
+    if (bindings) {
+      bindings.forEach((b) => this.registerVariable(b.name, b.types));
+    }
   };
   exitWithClause: (ctx: WithClauseContext) => void = () => {
     // Nothing to do - with creates a chain of contexts

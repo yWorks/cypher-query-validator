@@ -24,7 +24,7 @@ export class BindingCollector extends CypherListener {
     const varName = NameRetriever.getName(ctx.variable());
     if (ctx.expression().ruleIndex === CypherParser.RULE_expression) {
       const expVar = NameRetriever.getName(ctx.expression());
-      if (expVar) {
+      if (expVar && varName) {
         this.bindings.push({ name: varName, types: this.resolve(expVar) });
       }
     }
