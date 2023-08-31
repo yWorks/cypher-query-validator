@@ -504,15 +504,51 @@ properties : mapLiteral
 
 relType : ':' SP? relTypeName ;
 
+relationShipTypeTerm : relTypeName
+       | orRelationShipTypeTerm
+       | wildcardRelationShipType
+       | parenthesizedRelationShipTypeTerm
+       ;
+
+wildcardRelationShipType : '%' ;
+
+orRelationShipTypeTerm : andRelationShipTypeTerm ( SP? '|' SP? andRelationShipTypeTerm )* ;
+
+andRelationShipTypeTerm : notRelationShipTypeTerm ( SP? '&' SP? notRelationShipTypeTerm )* ;
+
+notRelationShipTypeTerm : ( inversionToken )* relTypeName ;
+
+parenthesizedRelationShipTypeTerm : '(' SP? relationShipTypeTerm SP? ')' ;
+
+
 relationshipTypes : relationshipType ( SP? '|' relationshipTypeOptionalColon )* ;
 
-relationshipType : ':' relTypeName ;
+relationshipType : ':' relationShipTypeTerm ;
+
+inversionToken : '!' ;
 
 relationshipTypeOptionalColon : ':'? relTypeName ;
 
 nodeLabels : nodeLabel ( SP? nodeLabel )* ;
 
-nodeLabel : ':' labelName ;
+//nodeLabel : ':' SP? inversionToken? SP? labelName ;
+nodeLabel : ':' labelTerm ;
+
+labelTerm : labelName
+       | orLabelTerm
+       | wildcardLabel
+       | parenthesizedLabelTerm
+       ;
+
+wildcardLabel : '%' ;
+
+orLabelTerm : andLabelTerm ( SP? '|' SP? andLabelTerm )* ;
+
+andLabelTerm : notLabelTerm ( SP? '&' SP? notLabelTerm )* ;
+
+notLabelTerm : inversionToken SP? labelName ;
+
+parenthesizedLabelTerm : '(' SP? labelTerm SP? ')' ;
 
 rangeLiteral : '*' SP? ( integerLiteral SP? )? ( '..' SP? ( integerLiteral SP? )? )? ;
 
@@ -520,7 +556,7 @@ labelName : symbolicName ;
 
 relTypeName : symbolicName ;
 
-expression : orExpression | existsSubQuery;
+expression : orExpression;
 
 existsSubQuery : EXISTS SP? existsSubQueryBody;
 
@@ -608,6 +644,7 @@ atom : literal
      | relationshipsPattern
      | parenthesizedExpression
      | functionInvocation
+     | existsSubQuery
      | variable
      ;
 

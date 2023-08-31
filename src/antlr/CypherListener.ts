@@ -165,11 +165,24 @@ import { RelationshipPatternEndContext } from "./CypherParser";
 import { RelationshipDetailContext } from "./CypherParser";
 import { PropertiesContext } from "./CypherParser";
 import { RelTypeContext } from "./CypherParser";
+import { RelationShipTypeTermContext } from "./CypherParser";
+import { WildcardRelationShipTypeContext } from "./CypherParser";
+import { OrRelationShipTypeTermContext } from "./CypherParser";
+import { AndRelationShipTypeTermContext } from "./CypherParser";
+import { NotRelationShipTypeTermContext } from "./CypherParser";
+import { ParenthesizedRelationShipTypeTermContext } from "./CypherParser";
 import { RelationshipTypesContext } from "./CypherParser";
 import { RelationshipTypeContext } from "./CypherParser";
+import { InversionTokenContext } from "./CypherParser";
 import { RelationshipTypeOptionalColonContext } from "./CypherParser";
 import { NodeLabelsContext } from "./CypherParser";
 import { NodeLabelContext } from "./CypherParser";
+import { LabelTermContext } from "./CypherParser";
+import { WildcardLabelContext } from "./CypherParser";
+import { OrLabelTermContext } from "./CypherParser";
+import { AndLabelTermContext } from "./CypherParser";
+import { NotLabelTermContext } from "./CypherParser";
+import { ParenthesizedLabelTermContext } from "./CypherParser";
 import { RangeLiteralContext } from "./CypherParser";
 import { LabelNameContext } from "./CypherParser";
 import { RelTypeNameContext } from "./CypherParser";
@@ -1879,6 +1892,66 @@ export default class CypherListener extends ParseTreeListener {
 	 */
 	exitRelType?: (ctx: RelTypeContext) => void;
 	/**
+	 * Enter a parse tree produced by `CypherParser.relationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterRelationShipTypeTerm?: (ctx: RelationShipTypeTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.relationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitRelationShipTypeTerm?: (ctx: RelationShipTypeTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.wildcardRelationShipType`.
+	 * @param ctx the parse tree
+	 */
+	enterWildcardRelationShipType?: (ctx: WildcardRelationShipTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.wildcardRelationShipType`.
+	 * @param ctx the parse tree
+	 */
+	exitWildcardRelationShipType?: (ctx: WildcardRelationShipTypeContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.orRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterOrRelationShipTypeTerm?: (ctx: OrRelationShipTypeTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.orRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitOrRelationShipTypeTerm?: (ctx: OrRelationShipTypeTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.andRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterAndRelationShipTypeTerm?: (ctx: AndRelationShipTypeTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.andRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitAndRelationShipTypeTerm?: (ctx: AndRelationShipTypeTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.notRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterNotRelationShipTypeTerm?: (ctx: NotRelationShipTypeTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.notRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitNotRelationShipTypeTerm?: (ctx: NotRelationShipTypeTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.parenthesizedRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterParenthesizedRelationShipTypeTerm?: (ctx: ParenthesizedRelationShipTypeTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.parenthesizedRelationShipTypeTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitParenthesizedRelationShipTypeTerm?: (ctx: ParenthesizedRelationShipTypeTermContext) => void;
+	/**
 	 * Enter a parse tree produced by `CypherParser.relationshipTypes`.
 	 * @param ctx the parse tree
 	 */
@@ -1898,6 +1971,16 @@ export default class CypherListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRelationshipType?: (ctx: RelationshipTypeContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.inversionToken`.
+	 * @param ctx the parse tree
+	 */
+	enterInversionToken?: (ctx: InversionTokenContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.inversionToken`.
+	 * @param ctx the parse tree
+	 */
+	exitInversionToken?: (ctx: InversionTokenContext) => void;
 	/**
 	 * Enter a parse tree produced by `CypherParser.relationshipTypeOptionalColon`.
 	 * @param ctx the parse tree
@@ -1928,6 +2011,66 @@ export default class CypherListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitNodeLabel?: (ctx: NodeLabelContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.labelTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterLabelTerm?: (ctx: LabelTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.labelTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitLabelTerm?: (ctx: LabelTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.wildcardLabel`.
+	 * @param ctx the parse tree
+	 */
+	enterWildcardLabel?: (ctx: WildcardLabelContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.wildcardLabel`.
+	 * @param ctx the parse tree
+	 */
+	exitWildcardLabel?: (ctx: WildcardLabelContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.orLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterOrLabelTerm?: (ctx: OrLabelTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.orLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitOrLabelTerm?: (ctx: OrLabelTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.andLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterAndLabelTerm?: (ctx: AndLabelTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.andLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitAndLabelTerm?: (ctx: AndLabelTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.notLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterNotLabelTerm?: (ctx: NotLabelTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.notLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitNotLabelTerm?: (ctx: NotLabelTermContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.parenthesizedLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterParenthesizedLabelTerm?: (ctx: ParenthesizedLabelTermContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.parenthesizedLabelTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitParenthesizedLabelTerm?: (ctx: ParenthesizedLabelTermContext) => void;
 	/**
 	 * Enter a parse tree produced by `CypherParser.rangeLiteral`.
 	 * @param ctx the parse tree
