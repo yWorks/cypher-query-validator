@@ -63,8 +63,10 @@ class PatternFixer extends CypherListener {
     this.chains.push([]);
   }
 
-  startNewScope(inherit:boolean = true) {
-    this.scopes.push({ bindings: inherit ? [...this.scopes.at(-1).bindings] : []});
+  startNewScope(inherit: boolean = true) {
+    this.scopes.push({
+      bindings: inherit ? [...this.scopes.at(-1).bindings] : [],
+    });
   }
 
   exitScope() {
@@ -93,9 +95,10 @@ class PatternFixer extends CypherListener {
     }
   }
 
-  enterSubqueryClause: (ctx: SubqueryClauseContext) => void = () => this.startNewScope()
-  exitSubqueryClause: (ctx: SubqueryClauseContext) => void = () => this.exitScope()
-
+  enterSubqueryClause: (ctx: SubqueryClauseContext) => void = () =>
+    this.startNewScope();
+  exitSubqueryClause: (ctx: SubqueryClauseContext) => void = () =>
+    this.exitScope();
 
   fixPatterns() {
     const chain = this.chains.pop()!;
@@ -172,14 +175,18 @@ class PatternFixer extends CypherListener {
     }
   }
 
-
-  enterWithClause: (ctx: WithClauseContext) => void = (ctx)=> {
-    const bindings = BindingCollector.getBindings(variable => this.resolve(variable), this.scopes.at(-1).bindings, ctx)
-    this.startNewScope(false)
-    bindings.forEach(b => this.registerVariable(b.name, b.types))
-  }
-  exitWithClause: (ctx: WithClauseContext) => void = (ctx)=> {
-  }
+  enterWithClause: (ctx: WithClauseContext) => void = (ctx) => {
+    const bindings = BindingCollector.getBindings(
+      (variable) => this.resolve(variable),
+      this.scopes.at(-1).bindings,
+      ctx,
+    );
+    this.startNewScope(false);
+    bindings.forEach((b) => this.registerVariable(b.name, b.types));
+  };
+  exitWithClause: (ctx: WithClauseContext) => void = () => {
+    // Nothing to do - with creates a chain of contexts
+  };
 
   enterNodePattern: (ctx: NodePatternContext) => void = (ctx) => {
     const currentChain = this.getCurrentChain();

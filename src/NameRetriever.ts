@@ -15,15 +15,15 @@ export class NameRetriever extends CypherListener {
     } else {
       this.name = ctx.getText();
     }
-    this.count++
+    this.count++;
   };
 
   static getName(root?: ParserRuleContext): string | undefined {
     if (root) {
       const nameRetriever = new NameRetriever();
       ParseTreeWalker.DEFAULT.walk(nameRetriever, root);
-      if (nameRetriever.count !== 1){
-        return undefined
+      if (nameRetriever.count !== 1) {
+        return undefined;
       }
       return nameRetriever.name;
     } else {

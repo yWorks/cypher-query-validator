@@ -44,7 +44,6 @@ export class BindingCollector extends CypherListener {
       }
     }
   };
-  exitReturnItem: (ctx: ReturnItemContext) => void = (ctx) => {};
 
   static getBindings(
     resolve: (variable: string) => LabelValidator,

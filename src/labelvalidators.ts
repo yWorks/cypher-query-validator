@@ -81,7 +81,10 @@ class TermValidatorBase extends CypherListener {
     const name = NameRetriever.getName(ctx);
     if (name) {
       this.validations.push(
-        labeledValidator((label) => label.toLowerCase() === name.toLowerCase(), name),
+        labeledValidator(
+          (label) => label.toLowerCase() === name.toLowerCase(),
+          name,
+        ),
       );
     }
   };
