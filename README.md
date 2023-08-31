@@ -18,4 +18,6 @@ It will return `' '` for invalid Cypher and will otherwise correct the arrow hea
 
 Copyright 2023, Sebastian Mueller, yWorks GmbH
 
-[Licensed under MIT](license.md)
+The [antlr file](./src/antlr/Cypher.g4) is derived from https://github.com/neo4j/cypher-editor/tree/main/packages/antlr4 copyrighted under Apache 2.0 license, Neo4j 2023. Thanks!
+
+[Licensed under Apache 2.0](license.md)
