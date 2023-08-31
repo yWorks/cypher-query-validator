@@ -1,18 +1,14 @@
 import CypherParser, {
-  AsMappingContext,
   CypherContext,
   NodePatternContext,
   PatternElementContext,
   RelationshipPatternContext,
   RelationshipsPatternContext,
-  ReturnItemContext,
-  ReturnItemsContext,
   SubqueryClauseContext,
-  VariableContext,
   WithClauseContext,
 } from "./antlr/CypherParser";
 import CypherLexer from "./antlr/CypherLexer";
-import {CharStream, CommonTokenStream, ParseTreeVisitor, ParseTreeWalker} from "antlr4";
+import { CharStream, CommonTokenStream, ParseTreeWalker } from "antlr4";
 import CypherListener from "./antlr/CypherListener";
 import { NameRetriever } from "./NameRetriever";
 import {
@@ -21,6 +17,7 @@ import {
   NodeLabelValidator,
   RelationShipTypeValidator,
 } from "./labelvalidators";
+import { Binding, BindingCollector } from "./BindingCollector";
 
 type NodeChainElement = {
   type: "node";
@@ -34,53 +31,7 @@ type RelChainElement = {
   ctx: RelationshipPatternContext;
 };
 
-type Binding = { name: string; types: LabelValidator };
 type Scope = { bindings: Binding[] };
-
-class BindingCollector extends CypherListener {
-  constructor(private resolve: (variable: string) => LabelValidator, private oldBindings: Binding[], private bindings: Binding[]) {
-    super();
-  }
-
-  enterAsMapping: (ctx: AsMappingContext) => void = (ctx)=> {
-    const varName = NameRetriever.getName(ctx.variable())
-    if (ctx.expression().ruleIndex === CypherParser.RULE_expression){
-      const expVar = NameRetriever.getName(ctx.expression())
-      if (expVar){
-        this.bindings.push({name: varName, types: this.resolve(expVar)})
-      }
-    }
-  }
-
-  enterReturnItems: (ctx: ReturnItemsContext) => void = (ctx) => {
-    if (ctx.getText().charAt(0) === '*') {
-      this.bindings.push(...this.oldBindings)
-    }
-  }
-
-  enterReturnItem: (ctx: ReturnItemContext) => void = (ctx) => {
-    if (!ctx.asMapping()){
-      const name = NameRetriever.getName(ctx)
-      if (name){
-        this.bindings.push({name, types: this.resolve(name)})
-      }
-    }
-  }
-  exitReturnItem: (ctx: ReturnItemContext) => void = (ctx) => {
-
-  }
-
-  static getBindings(resolve: (variable: string) => LabelValidator, oldBindings:Binding[], ctx: WithClauseContext) {
-    if (ctx) {
-      const bindings: Binding[] = []
-      const nameRetriever = new BindingCollector(resolve, oldBindings, bindings);
-      ParseTreeWalker.DEFAULT.walk(nameRetriever, ctx);
-      return bindings
-    } else {
-      return undefined;
-    }
-  }
-}
 
 class PatternFixer extends CypherListener {
   private chains: (NodeChainElement | RelChainElement)[][] = [];
