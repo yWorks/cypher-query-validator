@@ -91,6 +91,21 @@
   },
   {
     "statement": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)<--(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization), (Organization, PARENT_OF, Organization)",
+    "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person as p\n   MATCH (p)<--(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization), (Organization, PARENT_OF, Organization)",
+    "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person as p\n   MATCH (p)-->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person as p\n   MATCH (c)<--(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization), (Organization, PARENT_OF, Organization)",
+    "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person as p\n   MATCH (c)<--(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
+  },
+  {
+    "statement": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)<--(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o",
     "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
     "correct_query": "MATCH (person:Person)\nCALL {\n   WITH person\n   MATCH (person)-->(o:Organization)\n   RETURN o LIMIT 3\n}\nRETURN person, o"
   },

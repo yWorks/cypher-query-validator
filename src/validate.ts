@@ -1,12 +1,18 @@
 import CypherParser, {
+  AsMappingContext,
   CypherContext,
   NodePatternContext,
   PatternElementContext,
   RelationshipPatternContext,
   RelationshipsPatternContext,
+  ReturnItemContext,
+  ReturnItemsContext,
+  SubqueryClauseContext,
+  VariableContext,
+  WithClauseContext,
 } from "./antlr/CypherParser";
 import CypherLexer from "./antlr/CypherLexer";
-import { CharStream, CommonTokenStream, ParseTreeWalker } from "antlr4";
+import {CharStream, CommonTokenStream, ParseTreeVisitor, ParseTreeWalker} from "antlr4";
 import CypherListener from "./antlr/CypherListener";
 import { NameRetriever } from "./NameRetriever";
 import {
@@ -31,6 +37,51 @@ type RelChainElement = {
 type Binding = { name: string; types: LabelValidator };
 type Scope = { bindings: Binding[] };
 
+class BindingCollector extends CypherListener {
+  constructor(private resolve: (variable: string) => LabelValidator, private oldBindings: Binding[], private bindings: Binding[]) {
+    super();
+  }
+
+  enterAsMapping: (ctx: AsMappingContext) => void = (ctx)=> {
+    const varName = NameRetriever.getName(ctx.variable())
+    if (ctx.expression().ruleIndex === CypherParser.RULE_expression){
+      const expVar = NameRetriever.getName(ctx.expression())
+      if (expVar){
+        this.bindings.push({name: varName, types: this.resolve(expVar)})
+      }
+    }
+  }
+
+  enterReturnItems: (ctx: ReturnItemsContext) => void = (ctx) => {
+    if (ctx.getText().charAt(0) === '*') {
+      this.bindings.push(...this.oldBindings)
+    }
+  }
+
+  enterReturnItem: (ctx: ReturnItemContext) => void = (ctx) => {
+    if (!ctx.asMapping()){
+      const name = NameRetriever.getName(ctx)
+      if (name){
+        this.bindings.push({name, types: this.resolve(name)})
+      }
+    }
+  }
+  exitReturnItem: (ctx: ReturnItemContext) => void = (ctx) => {
+
+  }
+
+  static getBindings(resolve: (variable: string) => LabelValidator, oldBindings:Binding[], ctx: WithClauseContext) {
+    if (ctx) {
+      const bindings: Binding[] = []
+      const nameRetriever = new BindingCollector(resolve, oldBindings, bindings);
+      ParseTreeWalker.DEFAULT.walk(nameRetriever, ctx);
+      return bindings
+    } else {
+      return undefined;
+    }
+  }
+}
+
 class PatternFixer extends CypherListener {
   private chains: (NodeChainElement | RelChainElement)[][] = [];
   public invalid = false;
@@ -44,7 +95,7 @@ class PatternFixer extends CypherListener {
     super();
   }
 
-  enterCypher: (ctx: CypherContext) => void = () => this.startNewScope();
+  enterCypher: (ctx: CypherContext) => void = () => this.startNewScope(false);
   exitCypher: (ctx: CypherContext) => void = () => this.exitScope();
 
   enterPatternElement: (ctx: PatternElementContext) => void = () =>
@@ -61,8 +112,8 @@ class PatternFixer extends CypherListener {
     this.chains.push([]);
   }
 
-  startNewScope() {
-    this.scopes.push({ bindings: [] });
+  startNewScope(inherit:boolean = true) {
+    this.scopes.push({ bindings: inherit ? [...this.scopes.at(-1).bindings] : []});
   }
 
   exitScope() {
@@ -75,12 +126,10 @@ class PatternFixer extends CypherListener {
   }
 
   resolve(variable: string): LabelValidator {
-    for (let i = this.scopes.length - 1; i >= 0; i--) {
-      const scope = this.scopes[i];
-      let binding = scope.bindings.find((b) => b.name === variable);
-      if (binding && binding.types) {
-        return binding.types;
-      }
+    const scope = this.scopes.at(-1);
+    let binding = scope.bindings.find((b) => b.name === variable);
+    if (binding && binding.types) {
+      return binding.types;
     }
     // new variable - matches anything
     return ANY_LABEL_VALIDATOR;
@@ -92,6 +141,10 @@ class PatternFixer extends CypherListener {
       this.diagnostics.push("Not Found " + message);
     }
   }
+
+  enterSubqueryClause: (ctx: SubqueryClauseContext) => void = () => this.startNewScope()
+  exitSubqueryClause: (ctx: SubqueryClauseContext) => void = () => this.exitScope()
+
 
   fixPatterns() {
     const chain = this.chains.pop()!;
@@ -122,6 +175,7 @@ class PatternFixer extends CypherListener {
         let leftExists = this.schema.find((value) =>
           schemaFits(value, target, relation, src),
         );
+        // console.log(`(:${src.labels})-[:${relation.types}]-(:${target.labels})`)
         if (relation.relType === "RIGHT") {
           if (!rightExists) {
             if (leftExists) {
@@ -165,6 +219,15 @@ class PatternFixer extends CypherListener {
         }
       }
     }
+  }
+
+
+  enterWithClause: (ctx: WithClauseContext) => void = (ctx)=> {
+    const bindings = BindingCollector.getBindings(variable => this.resolve(variable), this.scopes.at(-1).bindings, ctx)
+    this.startNewScope(false)
+    bindings.forEach(b => this.registerVariable(b.name, b.types))
+  }
+  exitWithClause: (ctx: WithClauseContext) => void = (ctx)=> {
   }
 
   enterNodePattern: (ctx: NodePatternContext) => void = (ctx) => {

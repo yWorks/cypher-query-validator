@@ -13,17 +13,13 @@ describe('Tests', ()=> {
         }
 
         if (testCase.correct_query === ''){
-            it('should fail testcase ' + testCase.statement, () => {
-
+            it(`should fail to convert '${testCase.statement}'`, () => {
                 const validated = validate(testCase.statement, tuples)
-
                 expect(validated).to.be.empty
             })
         } else {
-            it('should convert testcase ' + testCase.statement, () => {
-
+            it(`should convert '${testCase.statement}'`, () => {
                 const validated = validate(testCase.statement, tuples)
-
                 expect(validated).to.equal(testCase.correct_query)
             })
         }

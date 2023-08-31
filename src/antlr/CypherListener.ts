@@ -127,6 +127,7 @@ import { ReturnBodyContext } from "./CypherParser";
 import { FuncContext } from "./CypherParser";
 import { ReturnItemsContext } from "./CypherParser";
 import { ReturnItemContext } from "./CypherParser";
+import { AsMappingContext } from "./CypherParser";
 import { CallContext } from "./CypherParser";
 import { SubqueryClauseContext } from "./CypherParser";
 import { SubqueryContext } from "./CypherParser";
@@ -1511,6 +1512,16 @@ export default class CypherListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitReturnItem?: (ctx: ReturnItemContext) => void;
+	/**
+	 * Enter a parse tree produced by `CypherParser.asMapping`.
+	 * @param ctx the parse tree
+	 */
+	enterAsMapping?: (ctx: AsMappingContext) => void;
+	/**
+	 * Exit a parse tree produced by `CypherParser.asMapping`.
+	 * @param ctx the parse tree
+	 */
+	exitAsMapping?: (ctx: AsMappingContext) => void;
 	/**
 	 * Enter a parse tree produced by `CypherParser.call`.
 	 * @param ctx the parse tree

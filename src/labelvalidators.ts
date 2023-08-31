@@ -78,10 +78,10 @@ class TermValidatorBase extends CypherListener {
   }
 
   exitSymbolicName: (ctx: SymbolicNameContext) => void = (ctx) => {
-    const name = NameRetriever.getName(ctx)?.toLowerCase();
+    const name = NameRetriever.getName(ctx);
     if (name) {
       this.validations.push(
-        labeledValidator((label) => label.toLowerCase() === name, name),
+        labeledValidator((label) => label.toLowerCase() === name.toLowerCase(), name),
       );
     }
   };

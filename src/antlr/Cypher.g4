@@ -407,9 +407,11 @@ returnItems : ( '*' ( SP? ',' SP? returnItem )* )
 			| func
             ;
 
-returnItem : ( expression SP AS SP variable )
+returnItem : asMapping
            | expression
            ;
+
+asMapping: ( expression SP AS SP variable );
 
 call :  CALL SP procedureInvocation SP? procedureResults? ;
 
@@ -686,9 +688,7 @@ functionInvocation : functionInvocationBody SP? '(' SP? ( DISTINCT SP? )? ( expr
 
 functionInvocationBody : namespace functionName ;
 
-functionName : UnescapedSymbolicName
-             | EscapedSymbolicName
-             | COUNT ;
+functionName : symbolicName ;
 
 procedureName : symbolicName ;
 
@@ -767,9 +767,9 @@ dash:
 	| '－';
 
 symbolicName:
-    keyword
-    | UnescapedSymbolicName
+    UnescapedSymbolicName
     | EscapedSymbolicName
+    | keyword
     | HexLetter
     ;
 
