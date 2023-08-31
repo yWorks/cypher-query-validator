@@ -4,6 +4,8 @@ import {
   NotRelationShipTypeTermContext,
   OrLabelTermContext,
   OrRelationShipTypeTermContext,
+  ParenthesizedLabelTermContext,
+  ParenthesizedRelationShipTypeTermContext,
   SymbolicNameContext,
   WildcardLabelContext,
 } from "./antlr/CypherParser";
@@ -18,11 +20,7 @@ function labeledValidator(validator: Validator, label: string): Validator {
   return validator;
 }
 
-export const ANY_LABEL_VALIDATOR: Validator = labeledValidator(
-  () => true,
-  "ANY",
-);
-ANY_LABEL_VALIDATOR.toString = () => "ANY";
+export const ANY_LABEL_VALIDATOR: Validator = labeledValidator(() => true, "*");
 
 class ValidatorCreatorBase extends CypherListener {
   private validators: Validator[] = [];
@@ -30,13 +28,15 @@ class ValidatorCreatorBase extends CypherListener {
   protected andValidator() {
     const oldValidations = this.validators;
     if (oldValidations.length > 1) {
-      // If there is an *and* label, we don't have that in the schema, so we accept it if one of them matches...
-
       const andValidator: Validator = (label) =>
         oldValidations.every((validator) => validator(label));
       const orValidator: Validator = (label) =>
         oldValidations.some((validator) => validator(label));
 
+      // If there is an *and* label, we don't have that in the schema, so we accept it if one of them matches...
+      // we basically treat *and*s as *or*s, which is of course incorrect, but requested by the challenge
+      // also the validator does not accept arrays of labels for the schema.
+      // the validator interface could/should be improved to accept arrays of labels/types.
       const challengeQuirk = true;
 
       this.validators = [
@@ -64,6 +64,16 @@ class ValidatorCreatorBase extends CypherListener {
 
   protected wildCardValidator() {
     this.validators.push(ANY_LABEL_VALIDATOR);
+  }
+
+  protected parenthesizedValidator() {
+    const currentValidator = this.validators[0];
+    this.validators = [
+      labeledValidator(
+        (s) => currentValidator(s),
+        `(${currentValidator.toString()})`,
+      ),
+    ];
   }
 
   protected inverseValidator() {
@@ -100,13 +110,20 @@ export class NodeLabelValidator extends ValidatorCreatorBase {
     this.wildCardValidator();
   };
 
-  exitNotLabelTerm: (ctx: NotLabelTermContext) => void = () => {
-    this.inverseValidator();
+  exitNotLabelTerm: (ctx: NotLabelTermContext) => void = (ctx) => {
+    if (ctx.inversionToken()) {
+      this.inverseValidator();
+    }
   };
 
   exitNodeLabels: (ctx: NodeLabelsContext) => void = () => {
     this.andValidator();
   };
+
+  exitParenthesizedLabelTerm: (ctx: ParenthesizedLabelTermContext) => void =
+    () => {
+      this.parenthesizedValidator();
+    };
 
   static getValidator(root?: ParserRuleContext): Validator {
     if (root) {
@@ -129,13 +146,22 @@ export class RelationshipTypeValidator extends ValidatorCreatorBase {
     this.wildCardValidator();
   };
 
-  exitNotRelationShipTypeTerm: (ctx: NotRelationShipTypeTermContext) => void =
-    () => {
+  exitNotRelationShipTypeTerm: (ctx: NotRelationShipTypeTermContext) => void = (
+    ctx,
+  ) => {
+    if (ctx.inversionToken()) {
       this.inverseValidator();
-    };
+    }
+  };
 
   exitNodeLabels: (ctx: NodeLabelsContext) => void = () => {
     this.andValidator();
+  };
+
+  exitParenthesizedRelationShipTypeTerm: (
+    ctx: ParenthesizedRelationShipTypeTermContext,
+  ) => void = () => {
+    this.parenthesizedValidator();
   };
 
   static getValidator(root?: ParserRuleContext): Validator {

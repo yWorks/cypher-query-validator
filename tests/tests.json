@@ -5,9 +5,19 @@
     "correct_query": "MATCH (p:Person)-[:KNOWS]->(:Person) RETURN p, count(*) AS count"
   },
   {
+    "statement": "MATCH (p:Person)-[:(KNOWS|HURTS)]->(:Person) RETURN p, count(*) AS count",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person)-[:(KNOWS|HURTS)]->(:Person) RETURN p, count(*) AS count"
+  },
+  {
     "statement": "MATCH (p:Person)<-[:KNOWS]-(:Person) RETURN p, count(*) AS count",
     "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
     "correct_query": "MATCH (p:Person)<-[:KNOWS]-(:Person) RETURN p, count(*) AS count"
+  },
+  {
+    "statement": "MATCH (p:Person {id:\"Foo\"})<-[:WORKS_AT]-(o:Organization) RETURN o.name AS name",
+    "schema": "(Person, KNOWS, Person), (Person, WORKS_AT, Organization)",
+    "correct_query": "MATCH (p:Person {id:\"Foo\"})-[:WORKS_AT]->(o:Organization) RETURN o.name AS name"
   },
   {
     "statement": "MATCH (p:Person {id:\"Foo\"})<-[:WORKS_AT]-(o:Organization) RETURN o.name AS name",

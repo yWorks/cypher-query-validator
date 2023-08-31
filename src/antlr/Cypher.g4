@@ -518,10 +518,9 @@ orRelationShipTypeTerm : andRelationShipTypeTerm ( SP? '|' SP? andRelationShipTy
 
 andRelationShipTypeTerm : notRelationShipTypeTerm ( SP? '&' SP? notRelationShipTypeTerm )* ;
 
-notRelationShipTypeTerm : ( inversionToken )* relTypeName ;
+notRelationShipTypeTerm : inversionToken? SP? relTypeName ;
 
 parenthesizedRelationShipTypeTerm : '(' SP? relationShipTypeTerm SP? ')' ;
-
 
 relationshipTypes : relationshipType ( SP? '|' relationshipTypeOptionalColon )* ;
 
