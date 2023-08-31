@@ -2,7 +2,7 @@
   "name": "cypher-validator",
   "version": "0.0.1",
   "description": "Validates and fixes Cypher for a given schema",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "run": "ts-node src/validate.ts",
     "test": "cross-env TS_NODE_PROJECT='./tsconfig.test.json' mocha -r ts-node/register 'tests/index.ts'",
