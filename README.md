@@ -5,16 +5,16 @@ This Typescript package can be used to validate cypher queries. With the help of
 There is only one public API and that is the "validate" method:
 
 ```
-type RelationShipTuple = {
+type RelationshipTuple = {
   sourceLabel: string;
-  relationShipType: string;
+  relationshipType: string;
   targetLabel: string;
 };
 
-function validate(cypher: string, schema: RelationShipTuple[]): string;
+function validate(cypher: string, schema: RelationshipTuple[]): string;
 ```
 
-It will return `' '` for invalid Cypher and will otherwise correct the arrow heads on directed queries to match the schema, when possible.
+It will return `''` for invalid Cypher and will otherwise correct the arrow heads on directed queries to match the schema, when possible.
 
 Copyright 2023, Sebastian Mueller, yWorks GmbH
 

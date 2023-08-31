@@ -8,7 +8,7 @@ export class NameRetriever extends CypherListener {
 
   enterSymbolicName: (ctx: SymbolicNameContext) => void = (ctx) => {
     if (ctx.EscapedSymbolicName()) {
-      let escapedValue = ctx.EscapedSymbolicName().getText();
+      const escapedValue = ctx.EscapedSymbolicName().getText();
       this.name = escapedValue
         .substring(1, escapedValue.length - 1)
         .replace(/''/g, "'");

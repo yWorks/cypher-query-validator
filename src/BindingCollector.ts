@@ -1,4 +1,4 @@
-import { LabelValidator } from "./labelvalidators";
+import { Validator } from "./labelvalidators";
 import CypherListener from "./antlr/CypherListener";
 import CypherParser, {
   AsMappingContext,
@@ -9,11 +9,11 @@ import CypherParser, {
 import { NameRetriever } from "./NameRetriever";
 import { ParseTreeWalker } from "antlr4";
 
-export type Binding = { name: string; types: LabelValidator };
+export type Binding = { name: string; types: Validator };
 
 export class BindingCollector extends CypherListener {
   constructor(
-    private resolve: (variable: string) => LabelValidator,
+    private resolve: (variable: string) => Validator,
     private oldBindings: Binding[],
     private bindings: Binding[],
   ) {
@@ -46,7 +46,7 @@ export class BindingCollector extends CypherListener {
   };
 
   static getBindings(
-    resolve: (variable: string) => LabelValidator,
+    resolve: (variable: string) => Validator,
     oldBindings: Binding[],
     ctx: WithClauseContext,
   ) {

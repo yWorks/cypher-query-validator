@@ -13,21 +13,23 @@ import CypherListener from "./antlr/CypherListener";
 import { NameRetriever } from "./NameRetriever";
 import {
   ANY_LABEL_VALIDATOR,
-  LabelValidator,
+  Validator,
   NodeLabelValidator,
-  RelationShipTypeValidator,
+  RelationshipTypeValidator,
 } from "./labelvalidators";
 import { Binding, BindingCollector } from "./BindingCollector";
 
 type NodeChainElement = {
   type: "node";
-  labels: LabelValidator;
+  nodeLabelValidator: Validator;
 };
+
+type RelationShipDirection = "LEFT" | "RIGHT" | "UNDIRECTED";
 
 type RelChainElement = {
   type: "relation";
-  relType: "LEFT" | "RIGHT" | "UNDIRECTED";
-  types: LabelValidator;
+  relType: RelationShipDirection;
+  relationshipTypeValidator: Validator;
   ctx: RelationshipPatternContext;
 };
 
@@ -40,7 +42,7 @@ class PatternFixer extends CypherListener {
   private scopes: Scope[] = [];
 
   constructor(
-    private schema: RelationShipTuple[],
+    private schema: RelationshipTuple[],
     public cypher: string,
   ) {
     super();
@@ -80,14 +82,14 @@ class PatternFixer extends CypherListener {
     this.scopes.pop();
   }
 
-  registerVariable(name: string, types: LabelValidator) {
+  registerVariable(name: string, types: Validator) {
     const scope = this.currentScope();
     scope.bindings.push({ name, types });
   }
 
-  resolve(variable: string): LabelValidator {
+  resolve(variable: string): Validator {
     const scope = this.currentScope();
-    let binding = scope.bindings.find((b) => b.name === variable);
+    const binding = scope.bindings.find((b) => b.name === variable);
     if (binding && binding.types) {
       return binding.types;
     }
@@ -112,15 +114,15 @@ class PatternFixer extends CypherListener {
     const chain = this.chains.pop()!;
 
     function schemaFits(
-      schema: RelationShipTuple,
+      schema: RelationshipTuple,
       src: NodeChainElement,
       relation: RelChainElement,
       target: NodeChainElement,
     ) {
       return (
-        src.labels(schema.sourceLabel) &&
-        target.labels(schema.targetLabel) &&
-        relation.types(schema.relationShipType)
+        src.nodeLabelValidator(schema.sourceLabel) &&
+        target.nodeLabelValidator(schema.targetLabel) &&
+        relation.relationshipTypeValidator(schema.relationshipType)
       );
     }
 
@@ -131,10 +133,10 @@ class PatternFixer extends CypherListener {
         const src = chain[i - 1] as NodeChainElement;
         const relation = chainElement;
         const target = chain[i + 1] as NodeChainElement;
-        let rightExists = this.schema.find((value) =>
+        const rightExists = this.schema.find((value) =>
           schemaFits(value, src, relation, target),
         );
-        let leftExists = this.schema.find((value) =>
+        const leftExists = this.schema.find((value) =>
           schemaFits(value, target, relation, src),
         );
         // console.log(`(:${src.labels})-[:${relation.types}]-(:${target.labels})`)
@@ -151,7 +153,7 @@ class PatternFixer extends CypherListener {
                 this.cypher.substring(to + 2);
             } else {
               this.notFound(
-                `(:${src.labels})-[:${relation.types}]->(:${target.labels})`,
+                `(:${src.nodeLabelValidator})-[:${relation.relationshipTypeValidator}]->(:${target.nodeLabelValidator})`,
               );
             }
           }
@@ -168,14 +170,14 @@ class PatternFixer extends CypherListener {
                 this.cypher.substring(to + 1);
             } else {
               this.notFound(
-                `(:${src.labels})<-[:${relation.types}]-(:${target.labels})`,
+                `(:${src.nodeLabelValidator})<-[:${relation.relationshipTypeValidator}]-(:${target.nodeLabelValidator})`,
               );
             }
           }
         } else if (relation.relType === "UNDIRECTED") {
           if (!(rightExists || leftExists)) {
             this.notFound(
-              `(:${src.labels})-[:${relation.types}]-(:${target.labels})`,
+              `(:${src.nodeLabelValidator})-[:${relation.relationshipTypeValidator}]-(:${target.nodeLabelValidator})`,
             );
           }
         }
@@ -199,9 +201,9 @@ class PatternFixer extends CypherListener {
   };
 
   enterNodePattern: (ctx: NodePatternContext) => void = (ctx) => {
-    const currentChain = this.getCurrentChain();
+    const currentChain = this.currentChain();
 
-    let nodeLabels = this.getNodeLabels(ctx);
+    const nodeLabels = this.getNodeLabels(ctx);
 
     let name: string | undefined = undefined;
     if (ctx.variable()) {
@@ -212,11 +214,11 @@ class PatternFixer extends CypherListener {
     }
     currentChain.push({
       type: "node",
-      labels: nodeLabels,
+      nodeLabelValidator: nodeLabels,
     });
   };
 
-  private getNodeLabels(ctx: NodePatternContext): LabelValidator {
+  private getNodeLabels(ctx: NodePatternContext): Validator {
     const name = NameRetriever.getName(ctx.variable());
     if (!ctx.nodeLabels() && name) {
       return this.resolve(name);
@@ -228,48 +230,52 @@ class PatternFixer extends CypherListener {
   enterRelationshipPattern: (ctx: RelationshipPatternContext) => void = (
     ctx,
   ) => {
-    const relType = ctx.relationshipPatternStart().leftArrowHead()
+    const relType: RelationShipDirection = ctx
+      .relationshipPatternStart()
+      .leftArrowHead()
       ? "LEFT"
       : ctx.relationshipPatternEnd().rightArrowHead()
       ? "RIGHT"
       : "UNDIRECTED";
 
-    const relationShipTypes = this.getRelationShipTypes(ctx);
+    const relationshipTypeValidator = this.getRelationshipTypeValidator(ctx);
 
-    let name: string | undefined = undefined;
     if (ctx.relationshipDetail()?.variable()) {
-      name = NameRetriever.getName(ctx.relationshipDetail()?.variable());
-    }
-    if (name && relationShipTypes.length > 0) {
-      this.registerVariable(name, relationShipTypes);
+      const name = NameRetriever.getName(ctx.relationshipDetail()!.variable());
+      if (name) {
+        this.registerVariable(name, relationshipTypeValidator);
+      }
     }
 
-    const currentChain = this.getCurrentChain();
+    const currentChain = this.currentChain();
     currentChain.push({
       type: "relation",
-      types: relationShipTypes,
+      relationshipTypeValidator,
       relType,
       ctx,
     });
   };
 
-  private getCurrentChain() {
+  private currentChain() {
+    if (this.chains.length === 0) {
+      throw new Error("Bad state!");
+    }
     return this.chains.at(-1)!;
   }
 
-  private getRelationShipTypes(
+  private getRelationshipTypeValidator(
     ctx: RelationshipPatternContext,
-  ): LabelValidator {
+  ): Validator {
     const name = NameRetriever.getName(ctx.relationshipDetail()?.variable());
     if (name && !ctx.relationshipDetail()?.relationshipTypes()) {
       return this.resolve(name);
     }
-    // special rule: ignore variable length patterns and stop validation!?
+    // special contest rule: ignore variable length patterns and stop validation, immediately !?
     if (ctx.relationshipDetail()?.rangeLiteral()) {
       return ANY_LABEL_VALIDATOR;
     }
     if (ctx.relationshipDetail()?.relationshipTypes()) {
-      return RelationShipTypeValidator.getValidator(
+      return RelationshipTypeValidator.getValidator(
         ctx.relationshipDetail().relationshipTypes(),
       );
     } else {
@@ -278,31 +284,30 @@ class PatternFixer extends CypherListener {
   }
 }
 
-type RelationShipTuple = {
+export type RelationshipTuple = {
   sourceLabel: string;
-  relationShipType: string;
+  relationshipType: string;
   targetLabel: string;
 };
 
-export function validate(cypher: string, schema: RelationShipTuple[]) {
+export function validate(cypher: string, schema: RelationshipTuple[]) {
   const stream = new CharStream(cypher);
 
   const lexer = new CypherLexer(stream);
   const tokens = new CommonTokenStream(lexer);
   const parser = new CypherParser(tokens);
 
-  let tree: CypherContext;
-  tree = parser.cypher();
+  const tree: CypherContext = parser.cypher();
   if (parser.syntaxErrorsCount > 0) {
     return "";
   }
 
-  const builder = new PatternFixer(schema, cypher);
-  ParseTreeWalker.DEFAULT.walk(builder, tree);
+  const patternFixer = new PatternFixer(schema, cypher);
+  ParseTreeWalker.DEFAULT.walk(patternFixer, tree);
 
-  if (builder.diagnostics.length > 0) {
-    console.log(builder.diagnostics.join("\n"));
+  if (patternFixer.diagnostics.length > 0) {
+    console.log(patternFixer.diagnostics.join("\n"));
   }
 
-  return builder.invalid ? "" : builder.cypher;
+  return patternFixer.invalid ? "" : patternFixer.cypher;
 }

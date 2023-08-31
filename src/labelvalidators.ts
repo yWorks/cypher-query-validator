@@ -11,38 +11,35 @@ import { ParserRuleContext, ParseTreeWalker } from "antlr4";
 import CypherListener from "./antlr/CypherListener";
 import { NameRetriever } from "./NameRetriever";
 
-export type LabelValidator = (label: string) => boolean;
+export type Validator = (labelOrType: string) => boolean;
 
-function labeledValidator(
-  validator: LabelValidator,
-  label: string,
-): LabelValidator {
+function labeledValidator(validator: Validator, label: string): Validator {
   validator.toString = () => label;
   return validator;
 }
 
-export const ANY_LABEL_VALIDATOR: LabelValidator = labeledValidator(
+export const ANY_LABEL_VALIDATOR: Validator = labeledValidator(
   () => true,
   "ANY",
 );
 ANY_LABEL_VALIDATOR.toString = () => "ANY";
 
-class TermValidatorBase extends CypherListener {
-  private validations: LabelValidator[] = [];
+class ValidatorCreatorBase extends CypherListener {
+  private validators: Validator[] = [];
 
   protected andValidator() {
-    const oldValidations = this.validations;
+    const oldValidations = this.validators;
     if (oldValidations.length > 1) {
       // If there is an *and* label, we don't have that in the schema, so we accept it if one of them matches...
 
-      const andValidator: LabelValidator = (label) =>
+      const andValidator: Validator = (label) =>
         oldValidations.every((validator) => validator(label));
-      const orValidator: LabelValidator = (label) =>
+      const orValidator: Validator = (label) =>
         oldValidations.some((validator) => validator(label));
 
       const challengeQuirk = true;
 
-      this.validations = [
+      this.validators = [
         labeledValidator(
           challengeQuirk ? orValidator : andValidator,
           oldValidations.map((v) => v.toString()).join("&"),
@@ -52,11 +49,11 @@ class TermValidatorBase extends CypherListener {
   }
 
   protected orValidator() {
-    const oldValidations = this.validations;
+    const oldValidations = this.validators;
     if (oldValidations.length > 1) {
-      const orValidator: LabelValidator = (label) =>
+      const orValidator: Validator = (label) =>
         oldValidations.some((validator) => validator(label));
-      this.validations = [
+      this.validators = [
         labeledValidator(
           orValidator,
           oldValidations.map((v) => v.toString()).join("|"),
@@ -66,12 +63,12 @@ class TermValidatorBase extends CypherListener {
   }
 
   protected wildCardValidator() {
-    this.validations.push(ANY_LABEL_VALIDATOR);
+    this.validators.push(ANY_LABEL_VALIDATOR);
   }
 
   protected inverseValidator() {
-    const validator = this.validations[0];
-    this.validations[0] = labeledValidator(
+    const validator = this.validators[0];
+    this.validators[0] = labeledValidator(
       (label) => !validator(label),
       "!" + validator.toString(),
     );
@@ -80,7 +77,7 @@ class TermValidatorBase extends CypherListener {
   exitSymbolicName: (ctx: SymbolicNameContext) => void = (ctx) => {
     const name = NameRetriever.getName(ctx);
     if (name) {
-      this.validations.push(
+      this.validators.push(
         labeledValidator(
           (label) => label.toLowerCase() === name.toLowerCase(),
           name,
@@ -89,12 +86,12 @@ class TermValidatorBase extends CypherListener {
     }
   };
 
-  get validator(): LabelValidator {
-    return this.validations[0] ?? ANY_LABEL_VALIDATOR;
+  get validator(): Validator {
+    return this.validators[0] ?? ANY_LABEL_VALIDATOR;
   }
 }
 
-export class NodeLabelValidator extends TermValidatorBase {
+export class NodeLabelValidator extends ValidatorCreatorBase {
   exitOrLabelTerm: (ctx: OrLabelTermContext) => void = () => {
     this.orValidator();
   };
@@ -111,7 +108,7 @@ export class NodeLabelValidator extends TermValidatorBase {
     this.andValidator();
   };
 
-  static getValidator(root?: ParserRuleContext): LabelValidator {
+  static getValidator(root?: ParserRuleContext): Validator {
     if (root) {
       const validatorWalker = new NodeLabelValidator();
       ParseTreeWalker.DEFAULT.walk(validatorWalker, root);
@@ -122,7 +119,7 @@ export class NodeLabelValidator extends TermValidatorBase {
   }
 }
 
-export class RelationShipTypeValidator extends TermValidatorBase {
+export class RelationshipTypeValidator extends ValidatorCreatorBase {
   exitOrRelationShipTypeTerm: (ctx: OrRelationShipTypeTermContext) => void =
     () => {
       this.orValidator();
@@ -141,9 +138,9 @@ export class RelationShipTypeValidator extends TermValidatorBase {
     this.andValidator();
   };
 
-  static getValidator(root?: ParserRuleContext): LabelValidator {
+  static getValidator(root?: ParserRuleContext): Validator {
     if (root) {
-      const validatorWalker = new NodeLabelValidator();
+      const validatorWalker = new RelationshipTypeValidator();
       ParseTreeWalker.DEFAULT.walk(validatorWalker, root);
       return validatorWalker.validator;
     } else {

@@ -1,20 +1,16 @@
 import tests from "./tests.json";
-import { validate } from "../src/validate";
+import { RelationshipTuple, validate } from "../src/validate";
 import { expect } from "chai";
 
 describe("Tests", () => {
   tests.forEach((testCase) => {
-    const tuples: {
-      sourceLabel: string;
-      relationShipType: string;
-      targetLabel: string;
-    }[] = [];
+    const tuples: RelationshipTuple[] = [];
 
     const schema = testCase.schema.matchAll(/\((\w+),\s*(\w+),\s*(\w+)\s*\)/g);
     for (const tuple of schema) {
       tuples.push({
         sourceLabel: tuple[1],
-        relationShipType: tuple[2],
+        relationshipType: tuple[2],
         targetLabel: tuple[3],
       });
     }
