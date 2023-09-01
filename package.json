@@ -7,7 +7,7 @@
     "run": "ts-node src/validate.ts",
     "test": "cross-env TS_NODE_PROJECT='./tsconfig.test.json' mocha -r ts-node/register 'tests/index.ts'",
     "prettier": "prettier --write ./src/*.ts",
-    "generate-antlr-ts": "cd src/antlr && docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v `pwd`:/work antlr/antlr4 -Dlanguage=Cypher.g4"
+    "generate-antlr-ts": "cd src/antlr && docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v `pwd`:/work antlr/antlr4 -Dlanguage=Typescript Cypher.g4"
   },
   "author": "",
   "license": "MIT",
