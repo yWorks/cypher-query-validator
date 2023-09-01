@@ -506,25 +506,28 @@ properties : mapLiteral
 
 relType : ':' SP? relTypeName ;
 
-relationShipTypeTerm : relTypeName
-       | orRelationShipTypeTerm
-       | wildcardRelationShipType
-       | parenthesizedRelationShipTypeTerm
+relationshipTypeTermAtom : parenthesizedRelationshipTypeTerm
+   | relTypeName ;
+
+relationshipTypeTerm : relTypeName
+       | orRelationshipTypeTerm
+       | wildcardRelationshipType
+       | parenthesizedRelationshipTypeTerm
        ;
 
-wildcardRelationShipType : '%' ;
+wildcardRelationshipType : '%' ;
 
-orRelationShipTypeTerm : andRelationShipTypeTerm ( SP? '|' SP? andRelationShipTypeTerm )* ;
+orRelationshipTypeTerm : andRelationshipTypeTerm ( SP? '|' SP? andRelationshipTypeTerm )* ;
 
-andRelationShipTypeTerm : notRelationShipTypeTerm ( SP? '&' SP? notRelationShipTypeTerm )* ;
+andRelationshipTypeTerm : notRelationshipTypeTerm ( SP? '&' SP? notRelationshipTypeTerm )* ;
 
-notRelationShipTypeTerm : inversionToken? SP? relTypeName ;
+notRelationshipTypeTerm : inversionToken* SP? relationshipTypeTermAtom ;
 
-parenthesizedRelationShipTypeTerm : '(' SP? relationShipTypeTerm SP? ')' ;
+parenthesizedRelationshipTypeTerm : '(' SP? relationshipTypeTerm SP? ')' ;
 
 relationshipTypes : relationshipType ( SP? '|' relationshipTypeOptionalColon )* ;
 
-relationshipType : ':' relationShipTypeTerm ;
+relationshipType : ':' relationshipTypeTerm ;
 
 inversionToken : '!' ;
 
@@ -532,8 +535,10 @@ relationshipTypeOptionalColon : ':'? relTypeName ;
 
 nodeLabels : nodeLabel ( SP? nodeLabel )* ;
 
-//nodeLabel : ':' SP? inversionToken? SP? labelName ;
 nodeLabel : ':' labelTerm ;
+
+labelAtom : parenthesizedLabelTerm
+       | labelName;
 
 labelTerm : labelName
        | orLabelTerm
@@ -547,7 +552,7 @@ orLabelTerm : andLabelTerm ( SP? '|' SP? andLabelTerm )* ;
 
 andLabelTerm : notLabelTerm ( SP? '&' SP? notLabelTerm )* ;
 
-notLabelTerm : inversionToken SP? labelName ;
+notLabelTerm : inversionToken* SP? labelAtom ;
 
 parenthesizedLabelTerm : '(' SP? labelTerm SP? ')' ;
 

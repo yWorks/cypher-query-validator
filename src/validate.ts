@@ -24,11 +24,11 @@ type NodeChainElement = {
   nodeLabelValidator: Validator;
 };
 
-type RelationShipDirection = "LEFT" | "RIGHT" | "UNDIRECTED";
+type RelationshipDirection = "LEFT" | "RIGHT" | "UNDIRECTED";
 
 type RelChainElement = {
   type: "relation";
-  relType: RelationShipDirection;
+  relType: RelationshipDirection;
   relationshipTypeValidator: Validator;
   ctx: RelationshipPatternContext;
 };
@@ -139,7 +139,9 @@ class PatternFixer extends CypherListener {
         const leftExists = this.schema.find((value) =>
           schemaFits(value, target, relation, src),
         );
-        console.log(`(:${src.nodeLabelValidator})-[:${relation.relationshipTypeValidator}]-(:${target.nodeLabelValidator})`)
+        console.log(
+          `(:${src.nodeLabelValidator})-[:${relation.relationshipTypeValidator}]-(:${target.nodeLabelValidator})`,
+        );
         if (relation.relType === "RIGHT") {
           if (!rightExists) {
             if (leftExists) {
@@ -230,7 +232,7 @@ class PatternFixer extends CypherListener {
   enterRelationshipPattern: (ctx: RelationshipPatternContext) => void = (
     ctx,
   ) => {
-    const relType: RelationShipDirection = ctx
+    const relType: RelationshipDirection = ctx
       .relationshipPatternStart()
       .leftArrowHead()
       ? "LEFT"
