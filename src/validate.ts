@@ -139,9 +139,11 @@ class PatternFixer extends CypherListener {
         const leftExists = this.schema.find((value) =>
           schemaFits(value, target, relation, src),
         );
+        /*
         console.log(
           `(:${src.nodeLabelValidator})-[:${relation.relationshipTypeValidator}]-(:${target.nodeLabelValidator})`,
         );
+        */
         if (relation.relType === "RIGHT") {
           if (!rightExists) {
             if (leftExists) {
