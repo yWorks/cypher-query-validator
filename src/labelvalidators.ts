@@ -34,11 +34,11 @@ class ValidatorCreatorBase extends CypherListener {
   }
 
   protected popStack(): Validator[] {
-    return this.validatorStack.pop();
+    return this.validatorStack.pop()!;
   }
 
   protected frame(): Validator[] {
-    return this.validatorStack.at(-1);
+    return this.validatorStack.at(-1)!;
   }
 
   protected andValidator() {
@@ -101,7 +101,7 @@ class ValidatorCreatorBase extends CypherListener {
 
   protected inverseValidator(inversions: number | undefined) {
     const validator = this.popStack()[0];
-    if (inversions > 0 && inversions % 2 === 1) {
+    if (typeof inversions !== "undefined" && inversions > 0 && inversions % 2 === 1) {
       this.frame().push(
         labeledValidator(
           (label) => !validator(label),
