@@ -2,15 +2,32 @@
   "name": "cypher-validator",
   "version": "0.0.1",
   "description": "Validates and fixes Cypher for a given schema",
-  "main": "src/index.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/cjs/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "run": "ts-node src/validate.ts",
     "test": "cross-env TS_NODE_PROJECT='./tsconfig.test.json' mocha -r ts-node/register 'tests/index.ts'",
     "prettier": "prettier --write ./src/*.ts",
-    "generate-antlr-ts": "cd src/antlr && docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v `pwd`:/work antlr/antlr4 -Dlanguage=Typescript Cypher.g4"
+    "generate-antlr-ts": "cd src/antlr && docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v `pwd`:/work antlr/antlr4 -Dlanguage=Typescript Cypher.g4",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "npm run build:cjs && npm run build:esm",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test"
   },
   "author": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "antlr4": "^4.13.0"
   },
