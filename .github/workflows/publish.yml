@@ -2,10 +2,19 @@ name: Publish to npm
 
 on:
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "publish" to confirm publishing to npm'
+        required: true
+        type: string
 
 jobs:
   publish:
+    if: github.event.inputs.confirm == 'publish'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       
