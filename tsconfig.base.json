@@ -2,16 +2,15 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "module": "commonjs",
-    "target": "es2015",
     "sourceMap": true,
     "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": [
     "node_modules",
     "dist"
   ]
-}
+} 
